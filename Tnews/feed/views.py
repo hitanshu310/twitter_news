@@ -2,7 +2,17 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from feed.utils import *
 from django.template import loader
+from django.urls import reverse
 from .formfile import TokenForm
+
+
+def checkAuth(request):
+    access_token_temp = request.session.get('access_token', None)
+    access_token_secret_temp = request.session.get('access_token_secret', None)
+    if access_token_temp is None or access_token_secret_temp is None:
+        return redirect('/auth/authorize/')
+    else:
+        return redirect(reverse('feed'))
 
 
 def autho(request):
@@ -34,18 +44,34 @@ def authorize(request):
         rt = request.session['request_token']
         del request.session['request_token']
         auth.request_token = rt
-        a, b = auth.get_access_token(token)
+        try:
+            a, b = auth.get_access_token(token)
+        except tweepy.TweepError:
+            return HttpResponse("invalid token")
         auth.set_access_token(a, b)
-        api = tweepy.API(auth)
-        public_tweets = api.home_timeline()
-        context = {
-            'api': api,
-            'pt': public_tweets,
-        }
-        template = loader.get_template('feed/tweets.html')
-        return HttpResponse(template.render(context, request))
+        request.session['access_token'] = a
+        request.session['access_token_secret'] = b
+        return redirect(reverse('feed'))
     else:
-        return redirect('/feed/')
+        return redirect(reverse('index'))
+
+
+def feed(request):
+    api = completeAuth(request)
+    public_tweets = api.home_timeline()
+    context = {
+        'api': api,
+        'pt': public_tweets,
+    }
+    template = loader.get_template('feed/tweets.html')
+    return HttpResponse(template.render(context, request))
+
+
+def logout(request):
+    request.session.flush()
+    return redirect(reverse('index'))
+
+
 
 
 

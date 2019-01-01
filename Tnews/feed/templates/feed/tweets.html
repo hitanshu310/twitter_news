@@ -1,3 +1,11 @@
+
+
+<form method="post" action = "{% url 'logout' %}">
+       {% csrf_token %}
+    <input type="submit" value="logout">
+</form>
+
+
 <div>
     {% for tweet in pt %}
 <p>{{ tweet.text }}</p><br>

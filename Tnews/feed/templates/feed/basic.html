@@ -1,5 +1,5 @@
 <a href="{{ url }}" target="_blank"><button>Get started</button></a>
-<form action="/auth/authenticate/" method="post">
+<form action="{% url 'auth1' %}" method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <input type="submit">
