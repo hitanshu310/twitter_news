@@ -9,4 +9,5 @@ urlpatterns = [
     path('authorize/', views.autho, name='auth2'),
     path('feed/',  views.feed, name='feed'),
     path('logout/', views.logout, name='logout'),
+    path('outrage/', views.hashtagFeed, name='hashTag')
 ]

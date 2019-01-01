@@ -12,7 +12,7 @@ def checkAuth(request):
     if access_token_temp is None or access_token_secret_temp is None:
         return redirect('/auth/authorize/')
     else:
-        return redirect(reverse('feed'))
+        return redirect(reverse('hashTag'))
 
 
 def autho(request):
@@ -32,7 +32,7 @@ def autho(request):
 
 
 def hello(request):
-    return HttpResponse("Hello there")
+    return HttpResponse("hello")
 
 
 def authorize(request):
@@ -64,6 +64,21 @@ def feed(request):
         'pt': public_tweets,
     }
     template = loader.get_template('feed/tweets.html')
+    return HttpResponse(template.render(context, request))
+
+
+def hashtagFeed(request):
+    api = completeAuth(request)
+    res = requests.get('https://ipinfo.io/')
+    res_json = res.json()
+    coords = res_json['loc'].split(',')
+    text = api.trends_closest(coords[0], coords[1])
+    pid = text[0]['woeid']
+    hashtags = api.trends_place(pid)[0]['trends']
+    context = {
+        'hashtags': hashtags,
+    }
+    template = loader.get_template('feed/trending_tags.html')
     return HttpResponse(template.render(context, request))
 
 
